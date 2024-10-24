@@ -23,23 +23,32 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">QWidget {
-    background-color: #f0f0f0;
+    <string notr="true">#centralwidget{
+	border: 0px;
+}
+
+
+QWidget {
+    background-color: white;
     border: 1px solid #dcdcdc;
     border-radius: 10px;
-    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 QLabel{
 	border: 0px;
-}</string>
+}
+
+QPushButton:hover{
+	background-color: #EFEFEF;
+}
+</string>
    </property>
    <widget class="QWidget" name="MainButtons" native="true">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>50</x>
       <y>490</y>
-      <width>461</width>
+      <width>441</width>
       <height>161</height>
      </rect>
     </property>
@@ -53,10 +62,10 @@ QLabel{
 	border-radius: 0px;
 }</string>
     </property>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="addSlideBtn">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>20</y>
        <width>41</width>
        <height>41</height>
@@ -67,12 +76,18 @@ QLabel{
        <pointsize>15</pointsize>
       </font>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="text">
       <string/>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>plus.png</normaloff>plus.png</iconset>
+       <normaloff>assets/plus.png</normaloff>assets/plus.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -84,7 +99,7 @@ QLabel{
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
-       <x>60</x>
+       <x>70</x>
        <y>20</y>
        <width>71</width>
        <height>41</height>
@@ -100,10 +115,10 @@ QLabel{
       <string>Slides</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="addBackgroundImageBtn">
      <property name="geometry">
       <rect>
-       <x>160</x>
+       <x>170</x>
        <y>20</y>
        <width>41</width>
        <height>41</height>
@@ -114,12 +129,21 @@ QLabel{
        <pointsize>15</pointsize>
       </font>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="text">
       <string/>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>plus.png</normaloff>plus.png</iconset>
+       <normaloff>assets/plus.png</normaloff>assets/plus.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>17</width>
+       <height>16</height>
+      </size>
      </property>
     </widget>
     <widget class="QLabel" name="label_2">
@@ -127,7 +151,7 @@ QLabel{
       <rect>
        <x>220</x>
        <y>20</y>
-       <width>231</width>
+       <width>211</width>
        <height>41</height>
       </rect>
      </property>
@@ -160,12 +184,12 @@ QLabel{
       <string/>
      </property>
     </widget>
-    <widget class="QPushButton" name="CreatePresentationButton_2">
+    <widget class="QPushButton" name="VerseRepeatBtn">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>30</x>
        <y>90</y>
-       <width>211</width>
+       <width>161</width>
        <height>51</height>
       </rect>
      </property>
@@ -175,8 +199,11 @@ QLabel{
        <pointsize>15</pointsize>
       </font>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="styleSheet">
-      <string notr="true">#CreatePresentationButton_2{
+      <string notr="true">#VerseRepeatBtn{
     border: none;
     color: white;
     background-color: #2C2C2C;
@@ -184,7 +211,7 @@ QLabel{
     padding: 10px;
 }
 
-#CreatePresentationButton_2:hover {
+#VerseRepeatBtn:hover {
     border: 2px solid #3498db;
     color: white;
     background-color: #3498db; 
@@ -193,11 +220,50 @@ QLabel{
 </string>
      </property>
      <property name="text">
-      <string>Slide Verse Repeat</string>
+      <string>Verse Repeat</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="HymnRepeatBtn">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>90</y>
+       <width>171</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Inter 18pt</family>
+       <pointsize>15</pointsize>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#HymnRepeatBtn{
+    border: none;
+    color: white;
+    background-color: #2C2C2C;
+    border-radius: 20px;
+    padding: 10px;
+}
+
+#HymnRepeatBtn:hover {
+    border: 2px solid #3498db;
+    color: white;
+    background-color: #3498db; 
+    border-radius: 20px;
+}
+</string>
+     </property>
+     <property name="text">
+      <string>Hymn Repeat</string>
      </property>
     </widget>
    </widget>
-   <widget class="QFrame" name="frame">
+   <widget class="QFrame" name="EditorFrame">
     <property name="geometry">
      <rect>
       <x>570</x>
@@ -212,7 +278,19 @@ QLabel{
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">Background-color: #EFEFEF;
+     <string notr="true">#EditorFrame{
+	Background-color: #EFEFEF;
+}
+
+QPushButton{
+	Background-color: #EFEFEF;
+	border: 0px;
+}
+
+
+QPushButton:hover{
+	Background-color: #FFFFFF;
+}
 </string>
     </property>
     <property name="frameShape">
@@ -224,16 +302,53 @@ QLabel{
     <widget class="QFontComboBox" name="fontComboBox">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>10</x>
        <y>10</y>
-       <width>188</width>
+       <width>271</width>
        <height>31</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <family>Inter 18pt</family>
+       <family>Inter 18pt,sans-serif</family>
+       <pointsize>10</pointsize>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QComboBox#fontComboBox {
+    font-family: 'Inter 18pt', sans-serif;
+    font-size: 10pt; /* Change font size to points */
+    color: black;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+QComboBox#fontComboBox::drop-down {
+    background-color: transparent; /* Change drop-down background */
+    width: 30px; /* Adjust drop-down width */
+}
+
+QComboBox#fontComboBox::drop-down:hover {
+   background-color: #EFEFEF;
+	border-radius: 8px;
+}
+
+QComboBox#fontComboBox::down-arrow {
+    image: url(C:/Users/markt/Scripture-Slides/Scripture-Slides/assets/arrowDown.png); /* Path to your custom arrow image */
+    width: 18px; /* Adjust width if needed */
+    height: 18px; /* Adjust height if needed */
+}
+
+QComboBox#fontComboBox QAbstractItemView {
+    font-family: 'Inter 18pt', sans-serif;
+    font-size: 10pt; /* Set point size for list items */
+    color: black;
+    background-color: white;
+    border: none;
+}
+</string>
      </property>
      <property name="currentText">
       <string>ITC Avant Garde Gothic Pro Book</string>
@@ -242,15 +357,22 @@ QLabel{
     <widget class="QPushButton" name="IncreaseFontSize">
      <property name="geometry">
       <rect>
-       <x>290</x>
+       <x>350</x>
        <y>10</y>
        <width>31</width>
        <height>31</height>
       </rect>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="styleSheet">
       <string notr="true">#IncreaseFontSize{
 	Border: 0px
+}
+
+#IncreaseFontSize:hover{
+	background-color: #FFFFFF;
 }</string>
      </property>
      <property name="text">
@@ -258,7 +380,7 @@ QLabel{
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>plus.png</normaloff>plus.png</iconset>
+       <normaloff>assets/plus.png</normaloff>assets/plus.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -270,15 +392,23 @@ QLabel{
     <widget class="QPushButton" name="DecreaseFontSize">
      <property name="geometry">
       <rect>
-       <x>220</x>
+       <x>290</x>
        <y>10</y>
        <width>31</width>
        <height>31</height>
       </rect>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="styleSheet">
       <string notr="true">#DecreaseFontSize{
-	Border: 0px
+	Border: 0px;
+	background-color: transparent;
+}
+
+#DecreaseFontSize:hover{
+	background-color: #FFFFFF;
 }</string>
      </property>
      <property name="text">
@@ -286,7 +416,7 @@ QLabel{
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>minus.png</normaloff>minus.png</iconset>
+       <normaloff>assets/minus.png</normaloff>assets/minus.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -295,28 +425,245 @@ QLabel{
       </size>
      </property>
     </widget>
-    <widget class="QLabel" name="FontSize">
+    <widget class="QPushButton" name="BoldBtn">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>410</x>
        <y>10</y>
-       <width>21</width>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#BoldBtn{
+	Border: 0px;
+	background-color: transparent;
+}
+
+#BoldBtn:hover{
+	background-color: #FFFFFF;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>assets/b.png</normaloff>assets/b.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="AlignLeft">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>10</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#IncreaseFontSize{
+	Border: 0px
+}
+
+#IncreaseFontSize:hover{
+	background-color: #FFFFFF;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>assets/left-align.png</normaloff>assets/left-align.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="AlignCenter">
+     <property name="geometry">
+      <rect>
+       <x>480</x>
+       <y>10</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#IncreaseFontSize{
+	Border: 0px
+}
+
+#IncreaseFontSize:hover{
+	background-color: #FFFFFF;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>assets/center-align.png</normaloff>assets/center-align.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="AlignRight">
+     <property name="geometry">
+      <rect>
+       <x>520</x>
+       <y>10</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#IncreaseFontSize{
+	Border: 0px
+}
+
+#IncreaseFontSize:hover{
+	background-color: #FFFFFF;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>assets/right-align.png</normaloff>assets/right-align.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="AlignJustify">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>10</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#IncreaseFontSize{
+	Border: 0px
+}
+
+#IncreaseFontSize:hover{
+	background-color: #FFFFFF;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>assets/justify.png</normaloff>assets/justify.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="BoldBtn_2">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>10</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#BoldBtn{
+	Border: 0px;
+	background-color: transparent;
+}
+
+#BoldBtn:hover{
+	background-color: #FFFFFF;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>assets/color-wheel.png</normaloff>assets/color-wheel.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>25</width>
+       <height>25</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="fontBox">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>9</y>
+       <width>31</width>
        <height>31</height>
       </rect>
      </property>
      <property name="font">
       <font>
        <family>Inter 18pt</family>
-       <pointsize>16</pointsize>
+       <pointsize>12</pointsize>
       </font>
      </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
      <property name="styleSheet">
-      <string notr="true">#FontSize{
-	background-color:transparent
+      <string notr="true">#fontBox{
+	background-color: transparent;
+	color: black;
+	border: 0px;
 }</string>
      </property>
      <property name="text">
-      <string>0</string>
+      <string>50</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -335,7 +682,7 @@ QLabel{
     <property name="font">
      <font>
       <family>Inter 18pt</family>
-      <pointsize>20</pointsize>
+      <pointsize>18</pointsize>
      </font>
     </property>
     <property name="styleSheet">
@@ -345,7 +692,7 @@ QLabel{
      <string>Text</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="addTextBtn">
     <property name="geometry">
      <rect>
       <x>580</x>
@@ -359,12 +706,15 @@ QLabel{
       <pointsize>15</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>plus.png</normaloff>plus.png</iconset>
+      <normaloff>assets/plus.png</normaloff>assets/plus.png</iconset>
     </property>
    </widget>
    <widget class="QFrame" name="BackgroundFrame">
@@ -399,7 +749,7 @@ border-radius: 10px;
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="CreatePresentationButton">
+   <widget class="QPushButton" name="createPresentationBtn">
     <property name="geometry">
      <rect>
       <x>950</x>
@@ -414,8 +764,11 @@ border-radius: 10px;
       <pointsize>15</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="styleSheet">
-     <string notr="true">#CreatePresentationButton{
+     <string notr="true">#createPresentationBtn{
     border: none;
     color: white;
     background-color: #2C2C2C;
@@ -423,12 +776,11 @@ border-radius: 10px;
     padding: 10px;
 }
 
-#CreatePresentationButton:hover {
+#createPresentationBtn:hover {
     border: 2px solid #3498db;
     color: white;
     background-color: #3498db; 
     border-radius: 20px;
-    transition: background-color 0.3s ease, border 0.3s ease; 
 }
 </string>
     </property>
@@ -457,7 +809,7 @@ border-radius: 10px;
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QListWidget" name="listWidget">
+    <widget class="QListWidget" name="Slide_List_Widget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -466,17 +818,23 @@ border-radius: 10px;
        <height>431</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>Inter 18pt</family>
+       <pointsize>20</pointsize>
+      </font>
+     </property>
      <property name="styleSheet">
-      <string notr="true">#listWidget{
+      <string notr="true">#slideListWidget{
 	border-radius: 0px;
 }</string>
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="addVerseBtn">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>710</x>
       <y>490</y>
       <width>41</width>
       <height>41</height>
@@ -487,18 +845,21 @@ border-radius: 10px;
       <pointsize>15</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>plus.png</normaloff>plus.png</iconset>
+      <normaloff>assets/plus.png</normaloff>assets/plus.png</iconset>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>790</x>
+      <x>770</x>
       <y>490</y>
       <width>81</width>
       <height>41</height>
@@ -507,7 +868,7 @@ border-radius: 10px;
     <property name="font">
      <font>
       <family>Inter 18pt</family>
-      <pointsize>20</pointsize>
+      <pointsize>18</pointsize>
      </font>
     </property>
     <property name="styleSheet">
@@ -517,15 +878,64 @@ border-radius: 10px;
      <string>Verse</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>490</y>
+      <width>81</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Inter 18pt</family>
+      <pointsize>18</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>Hymn</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addVerseBtn_2">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>490</y>
+      <width>41</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>assets/plus.png</normaloff>assets/plus.png</iconset>
+    </property>
+   </widget>
    <zorder>BackgroundFrame_2</zorder>
    <zorder>BackgroundFrame</zorder>
    <zorder>MainButtons</zorder>
-   <zorder>frame</zorder>
+   <zorder>EditorFrame</zorder>
    <zorder>label_3</zorder>
-   <zorder>pushButton_4</zorder>
-   <zorder>CreatePresentationButton</zorder>
-   <zorder>pushButton_5</zorder>
+   <zorder>addTextBtn</zorder>
+   <zorder>createPresentationBtn</zorder>
+   <zorder>addVerseBtn</zorder>
    <zorder>label_4</zorder>
+   <zorder>label_6</zorder>
+   <zorder>addVerseBtn_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

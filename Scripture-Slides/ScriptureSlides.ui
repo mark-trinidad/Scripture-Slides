@@ -18,6 +18,10 @@
   <property name="windowTitle">
    <string>Scripture Slides</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>assets/ScriptureSlidesIcon.png</normaloff>assets/ScriptureSlidesIcon.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>

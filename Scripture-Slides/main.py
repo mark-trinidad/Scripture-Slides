@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 import warnings
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QFileDialog, QFontComboBox, QPushButton,
                              QListWidget, QColorDialog, QGraphicsScene, QGraphicsTextItem, QGraphicsView, QTextEdit, QMenu)
@@ -9,7 +10,9 @@ from PyQt5.QtCore import Qt
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
-from PyQt5.QtWidgets import QGraphicsPixmapItem  # Added for DraggableImageItem
+from PyQt5.QtWidgets import QGraphicsPixmapItem, QDialog, QLabel, QVBoxLayout, QPushButton, QSpinBox # Added for DraggableImageItem
+import win32com.client as win32
+import msvcrt
 
 warnings.simplefilter("ignore", DeprecationWarning)
 
@@ -27,17 +30,62 @@ class DraggableImageItem(QGraphicsPixmapItem):  # QGraphicsPixmapItem imported h
         super().__init__(pixmap)
         self.setFlags(QGraphicsPixmapItem.ItemIsMovable | QGraphicsPixmapItem.ItemIsSelectable)
 
+class VerseRepeatWindow(QDialog):
+    def __init__(self, parent=None):
+        super(VerseRepeatWindow, self).__init__(parent)
+        self.setWindowTitle("Add Verse")
+
+        # Load the UI file for the VerseRepeatWindow (optional if you don't have one)
+        loadUi("Scripture-Slides/AddVerse.ui", self)
+
 
 class ScriptureSlides(QMainWindow):
     def __init__(self):
         super(ScriptureSlides, self).__init__()
-        loadUi("ScriptureSlides.ui", self)
+        self.setWindowFlags(Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        loadUi("Scripture-Slides/ScriptureSlides.ui", self)
+
+        self.setStyleSheet(""" 
+                QComboBox#fontComboBox {
+            font-family: 'Inter 18pt', sans-serif;
+            font-size: 10pt; /* Change font size to points */
+            color: black;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        QComboBox#fontComboBox::drop-down {
+            background-color: transparent; /* Change drop-down background */
+            width: 30px; /* Adjust drop-down width */
+        }
+
+        QComboBox#fontComboBox::drop-down:hover {
+        background-color: #EFEFEF;
+            border-radius: 8px;
+        }
+
+        QComboBox#fontComboBox::down-arrow {
+            image: url(C:/Users/markt/Scripture-Slides/Scripture-Slides/assets/arrowDown.png); /* Path to your custom arrow image */
+            width: 18px; /* Adjust width if needed */
+            height: 18px; /* Adjust height if needed */
+        }
+
+        QComboBox#fontComboBox QAbstractItemView {
+            font-family: 'Inter 18pt', sans-serif;
+            font-size: 10pt; /* Set point size for list items */
+            color: black;
+            background-color: white;
+            border: none;
+        }
+
+        """)
 
         # Initialize presentation object and QGraphicsScene only once
         self.prs = Presentation()
         self.prs.slide_width = Inches(20)
         self.prs.slide_height = Inches(11.25)
-
         self.slide_count = 0
         self.slide_previews = {}
 
@@ -45,49 +93,112 @@ class ScriptureSlides(QMainWindow):
         self.scene = QGraphicsScene(self.graphicsView)
         self.graphicsView.setScene(self.scene)
 
-        # Style for fontComboBox
-        self.setStyleSheet("""
-        QComboBox#fontComboBox {
-            font-family: 'Arial', sans-serif;
-            font-size: 14px;
-            color: black;
-            background-color: white;
-            border: 1px solid #ccc;
-            padding: 5px;
-            border-radius: 8px;
-        }
-        QComboBox#fontComboBox::drop-down {
-            background-color: transparent;
-            width: 30px;
-        }
-        QComboBox#fontComboBox::drop-down:hover {
-            background-color: #EFEFEF;
-            border-radius: 8px;
-        }
-        QComboBox#fontComboBox::down-arrow {
-            image: url(C:/Users/markt/Scripture-Slides/Scripture-Slides/assets/arrowDown.png);
-            width: 18px;
-            height: 18px;
-        }
-        QComboBox#fontComboBox QAbstractItemView {
-            font-family: 'Inter 18pt', sans-serif;
-            font-size: 5px;
-            color: black;
-            background-color: white;
-            border: none;
-        }
-        """)
-
         # Connect buttons to functions
         self.addSlideBtn.clicked.connect(self.add_slide)
         self.addBackgroundImageBtn.clicked.connect(self.add_background_image)
         self.createPresentationBtn.clicked.connect(self.create_presentation)
         self.Slide_List_Widget.itemSelectionChanged.connect(self.display_slide_in_graphics_view)
-        self.addTextBtn.clicked.connect(self.add_text_item)  # Corrected event connection
+        self.addTextBtn.clicked.connect(self.add_text_item) 
         self.Slide_List_Widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.Slide_List_Widget.customContextMenuRequested.connect(self.open_context_menu)
-
         self.current_slide = None
+        self.VerseRepeatBtn.clicked.connect(self.open_verse_repeat_window)
+        self.verse_repeat_window = None
+        self.SlideShowBtn.clicked.connect(self.start_slideshow_without_pptx)
+        
+
+    def start_slideshow_without_pptx(self):
+        """Generate a new PowerPoint presentation from the current slides in the app and start the slideshow with keyboard control."""
+        try:
+            slide_width = Inches(20).pt
+            slide_height = Inches(11.25).pt
+
+            powerpoint = win32.Dispatch("PowerPoint.Application")
+            powerpoint.Visible = True
+            presentation = powerpoint.Presentations.Add()
+
+            # Add slides from the graphics view items
+            for slide_num in range(self.Slide_List_Widget.count()):
+                slide_layout = 1  # Use title + content layout or change to blank if needed
+                slide = presentation.Slides.Add(slide_num + 1, slide_layout)
+                self.Slide_List_Widget.setCurrentRow(slide_num)
+                rect = self.graphicsView.viewport().rect()
+                screen = QApplication.primaryScreen()
+                pixmap = screen.grabWindow(self.graphicsView.winId(), rect.x(), rect.y(), rect.width(), rect.height())
+                temp_image_path = os.path.abspath(f"./temp_slide_{slide_num + 1}.png")
+                pixmap.save(temp_image_path)
+
+                if os.path.exists(temp_image_path):
+                    # Open image to get dimensions for scaling, and ensure it is closed after use
+                    with Image.open(temp_image_path) as img:
+                        img_width, img_height = img.size
+                        img_ratio = img_width / img_height
+                        slide_ratio = slide_width / slide_height
+
+                        # Scale and center the image to fit the slide
+                        if img_ratio > slide_ratio:
+                            new_width = slide_width
+                            new_height = slide_width / img_ratio
+                        else:
+                            new_height = slide_height
+                            new_width = slide_height * img_ratio
+                        
+                        left = (slide_width - new_width) / 2
+                        top = (slide_height - new_height) / 2
+                    
+                    # Insert scaled image into the slide
+                    slide.Shapes.AddPicture(temp_image_path, 0, 1, left, top, new_width, new_height)
+                    
+                    # Remove the image after it has been added to the slide
+                    os.remove(temp_image_path)
+
+            # Start the slideshow
+            slideshow = presentation.SlideShowSettings
+            slideshow.StartingSlide = 1
+            slideshow.EndingSlide = presentation.Slides.Count
+            slideshow.AdvanceMode = 1  # Manual advance
+            slideshow.Run()
+
+            # Control the slideshow with keyboard input
+            slide_show_window = powerpoint.SlideShowWindows(1)
+            running = True
+            print("Slideshow started. Press 'n' for next, 'p' for previous, or 'q' to quit.")
+
+            while running:
+                if msvcrt.kbhit():
+                    key = msvcrt.getch().decode('utf-8').lower()
+                    if key == 'n':  # Next slide
+                        slide_show_window.View.Next()
+                    elif key == 'p':  # Previous slide
+                        slide_show_window.View.Previous()
+                    elif key == 'q':  # Quit slideshow
+                        print("Exiting slideshow.")
+                        running = False
+
+            presentation.Close()
+            powerpoint.Quit()
+
+        except Exception as e:
+            print(f"Error during slideshow: {e}")
+        finally:
+            # Ensure PowerPoint closes after completion
+            presentation.Close()
+            powerpoint.Quit()
+
+    def open_verse_repeat_window(self):
+        """Open the Verse Repeat window."""
+        # Check if window already exists to prevent multiple instances
+        if self.verse_repeat_window is None or not self.verse_repeat_window.isVisible():
+            self.verse_repeat_window = VerseRepeatWindow(self)
+            self.verse_repeat_window.finished.connect(self.on_verse_repeat_window_closed)
+            self.verse_repeat_window.show()
+        else:
+            self.verse_repeat_window.raise_()  # Bring the existing window to the front
+
+    def on_verse_repeat_window_closed(self):
+        """Handle the closing of the Verse Repeat window."""
+        print("Verse Repeat window closed.")
+        self.verse_repeat_window = None  # Reset the window instance when closed
 
     def add_text_item(self):
         """Add a new draggable text item to the graphics view."""

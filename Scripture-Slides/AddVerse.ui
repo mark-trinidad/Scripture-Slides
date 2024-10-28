@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AddVerse</class>
+ <widget class="QDialog" name="AddVerse">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>400</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Inter 18pt</family>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Add Verse</string>
+  </property>
+  <widget class="QComboBox" name="FontComboBox">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>10</y>
+     <width>100</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QComboBox#FontComboBox {
+    font-family: 'Inter 18pt', sans-serif;
+    font-size: 10pt;
+    color: black;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+QComboBox#FontComboBox::drop-down {
+    background-color: transparent;
+    width: 30px;
+}
+
+QComboBox#FontComboBox::drop-down:hover {
+   background-color: #EFEFEF;
+   border-radius: 8px;
+}
+
+QComboBox#FontComboBox::drop-down:pressed {
+   background-color: #BFBFBF;
+}
+
+QComboBox#FontComboBox::down-arrow {
+    image: url(C:/Users/markt/Scripture-Slides/Scripture-Slides/assets/arrowDown.png);
+    width: 18px;
+    height: 18px;
+}
+
+QComboBox#FontComboBox QAbstractItemView {
+    font-family: 'Inter 18pt', sans-serif;
+    font-size: 10pt;
+    color: black;
+    background-color: white;
+    border: none;
+}
+</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>NIV</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ESV</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>NKJV</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="labelReference">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>60</y>
+     <width>120</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Verse Reference:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditReference">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>60</y>
+     <width>230</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="addButton">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>320</y>
+     <width>75</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Confirm</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancelButton">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>320</y>
+     <width>75</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>100</y>
+     <width>271</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Continue to Next Slide if verse exceeds</string>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="tristate">
+    <bool>false</bool>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

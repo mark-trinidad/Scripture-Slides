@@ -4,9 +4,9 @@ import time
 import warnings
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QFileDialog, QFontComboBox, QPushButton,
                              QListWidget, QColorDialog, QGraphicsScene, QGraphicsTextItem, QGraphicsView, QTextEdit, QMenu)
-from PyQt5.QtGui import QFont, QColor, QPixmap, QBrush, QIcon
+from PyQt5.QtGui import QFont, QColor, QPixmap, QBrush, QIcon, QTextCursor, QTextCharFormat
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
@@ -21,9 +21,9 @@ from PIL import Image, ImageDraw, ImageFont
 class DraggableTextItem(QGraphicsTextItem):
     def __init__(self, text):
         super().__init__(text)
-        self.setFlags(QGraphicsTextItem.ItemIsMovable | QGraphicsTextItem.ItemIsSelectable | QGraphicsTextItem.ItemIsFocusable)
-        self.setTextInteractionFlags(Qt.TextEditorInteraction)  # Allow editing on double-click
-
+        self.setTextInteractionFlags(Qt.TextEditorInteraction)  # Allow direct editing
+        self.setFlag(QGraphicsTextItem.ItemIsMovable, True)      # Enable dragging
+        self.setFlag(QGraphicsTextItem.ItemIsSelectable, True)   # Enable selection
 
 class DraggableImageItem(QGraphicsPixmapItem):  # QGraphicsPixmapItem imported here
     def __init__(self, pixmap):
@@ -38,6 +38,115 @@ class VerseRepeatWindow(QDialog):
         # Load the UI file for the VerseRepeatWindow (optional if you don't have one)
         loadUi("Scripture-Slides/AddVerse.ui", self)
 
+class SlideShowWindow(QMainWindow):
+    closed = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super(SlideShowWindow, self).__init__(parent)
+        loadUi("Scripture-Slides/SlideShowWindow.ui", self)
+        
+        self.backButton.clicked.connect(self.close)
+
+        # Initialize QGraphicsScene and other attributes needed for live edit
+        self.scene = QGraphicsScene(self.graphicsView)
+        self.graphicsView.setScene(self.scene)
+        
+        # Track currently selected slide and previews
+        self.current_slide_index = None
+        self.slide_previews = {}
+
+        # Connect buttons for live editing
+        self.LiveEditBtn.clicked.connect(self.enter_live_edit_mode)
+        self.LiveBtn.clicked.connect(self.apply_live_changes)
+
+        # New text box for copying/pasting text
+        self.textInputBox = QTextEdit(self)
+        self.textInputBox.setPlaceholderText("Copy and paste text here...")
+        self.textInputBox.setFixedHeight(100)
+        layout = QVBoxLayout(self.graphicsView)
+        layout.addWidget(self.textInputBox)
+        self.setLayout(layout)
+    
+    def enter_live_edit_mode(self):
+        """Enable live editing of the selected slide."""
+        selected_items = self.slideListWidget.selectedItems()
+        if selected_items:
+            selected_item = selected_items[0].text()
+            print(f"Entering live edit mode for {selected_item}")
+
+            # Enable text and image items to be moved and edited
+            for item in self.scene.items():
+                if isinstance(item, (DraggableTextItem, DraggableImageItem)):
+                    item.setFlag(QGraphicsTextItem.ItemIsMovable, True)
+
+    def apply_live_changes(self):
+        """Apply live changes to the selected slide in the PowerPoint file."""
+        selected_items = self.slideListWidget.selectedItems()
+        if selected_items:
+            selected_item = selected_items[0].text()
+            selected_index = int(selected_item.split(" ")[1]) - 1
+            slide = self.parent().prs.slides[selected_index]
+            
+            # Clear existing shapes on the slide
+            for shape in slide.shapes:
+                sp = shape._element
+                sp.getparent().remove(sp)
+
+            # Add copied text from the input box to slide
+            pasted_text = self.textInputBox.toPlainText()
+            text_item = DraggableTextItem(pasted_text)
+            text_item.setFont(QFont("Arial", 20))
+            self.scene.addItem(text_item)
+
+            # Save preview and update slide
+            self.parent().save_slide_preview()
+            print(f"Changes applied to {selected_item}")
+
+    def load_slide_previews(self, slide_previews):
+        """Load slide previews from the main window to display."""
+        self.slide_previews = slide_previews
+        self.update_slide_list()
+        
+    def update_slide_list(self):
+        """Populate the slide list with preview images."""
+        self.slideListWidget.clear()
+        for slide_name in self.slide_previews:
+            self.slideListWidget.addItem(slide_name)
+        self.slideListWidget.itemSelectionChanged.connect(self.display_slide_in_graphics_view)
+
+    def display_slide_in_graphics_view(self):
+        """Display the selected slide in QGraphicsView."""
+        selected_items = self.slideListWidget.selectedItems()
+        if selected_items:
+            selected_item = selected_items[0].text()
+            image_path = self.slide_previews.get(selected_item)
+            if image_path:
+                self.show_slide_preview(image_path)
+            else:
+                print(f"No preview available for {selected_item}")
+                
+    def show_slide_preview(self, image_path):
+        """Display an image in the QGraphicsView."""
+        pixmap = QPixmap(image_path)
+        self.scene.clear()
+        self.scene.addPixmap(pixmap)
+        self.graphicsView.fitInView(self.scene.itemsBoundingRect(), Qt.KeepAspectRatio)
+        
+    def enter_live_edit_mode(self):
+        """Enable live editing of the selected slide."""
+        # Logic for entering live edit mode based on the selected slide
+        print("Entering live edit mode.")
+        # Additional code here for text/image manipulation in live edit mode
+        
+    def apply_live_changes(self):
+        """Apply live changes to the selected slide."""
+        print("Applying live changes to the slideshow.")
+        # Logic to save changes to the main slideshow (update presentation object, etc.)
+        
+    def closeEvent(self, event):
+        # Emit the closed signal
+        self.closed.emit()
+        super(SlideShowWindow, self).closeEvent(event)
 
 class ScriptureSlides(QMainWindow):
     def __init__(self):
@@ -97,93 +206,50 @@ class ScriptureSlides(QMainWindow):
         self.addSlideBtn.clicked.connect(self.add_slide)
         self.addBackgroundImageBtn.clicked.connect(self.add_background_image)
         self.createPresentationBtn.clicked.connect(self.create_presentation)
-        self.Slide_List_Widget.itemSelectionChanged.connect(self.display_slide_in_graphics_view)
+        self.slideListWidget.itemSelectionChanged.connect(self.display_slide_in_graphics_view)
         self.addTextBtn.clicked.connect(self.add_text_item) 
-        self.Slide_List_Widget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.Slide_List_Widget.customContextMenuRequested.connect(self.open_context_menu)
+        self.slideListWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.slideListWidget.customContextMenuRequested.connect(self.open_context_menu)
         self.current_slide = None
         self.VerseRepeatBtn.clicked.connect(self.open_verse_repeat_window)
         self.verse_repeat_window = None
-        self.SlideShowBtn.clicked.connect(self.start_slideshow_without_pptx)
-        
+        self.SlideShowBtn.clicked.connect(self.open_slideshow_window)
+        self.slideshow_window = None
+        self.addTextBtn.clicked.connect(self.add_text_item) 
+        self.fontComboBox.currentFontChanged.connect(self.change_font_family)
+        self.DecreaseFontSize.clicked.connect(self.decrease_font_size)
+        self.IncreaseFontSize.clicked.connect(self.increase_font_size)
+        self.BoldBtn.clicked.connect(self.toggle_bold)
+        self.colorWheel.clicked.connect(self.change_font_color)
+        self.AlignLeft.clicked.connect(lambda: self.change_alignment(Qt.AlignLeft))
+        self.AlignCenter.clicked.connect(lambda: self.change_alignment(Qt.AlignCenter))
+        self.AlignRight.clicked.connect(lambda: self.change_alignment(Qt.AlignRight))
+        self.AlignJustify.clicked.connect(lambda: self.change_alignment(Qt.AlignJustify))
 
-    def start_slideshow_without_pptx(self):
-        """Generate a new PowerPoint presentation from the current slides in the app and start the slideshow with keyboard control."""
-        try:
-            slide_width = Inches(20).pt
-            slide_height = Inches(11.25).pt
+        # Default font settings
+        self.current_font = QFont("Arial", 20)
+        self.current_color = QColor(0, 0, 0)  # Default to black
+        self.current_alignment = Qt.AlignLeft
 
-            powerpoint = win32.Dispatch("PowerPoint.Application")
-            powerpoint.Visible = True
-            presentation = powerpoint.Presentations.Add()
 
-            # Add slides from the graphics view items
-            for slide_num in range(self.Slide_List_Widget.count()):
-                slide_layout = 1  # Use title + content layout or change to blank if needed
-                slide = presentation.Slides.Add(slide_num + 1, slide_layout)
-                self.Slide_List_Widget.setCurrentRow(slide_num)
-                rect = self.graphicsView.viewport().rect()
-                screen = QApplication.primaryScreen()
-                pixmap = screen.grabWindow(self.graphicsView.winId(), rect.x(), rect.y(), rect.width(), rect.height())
-                temp_image_path = os.path.abspath(f"./temp_slide_{slide_num + 1}.png")
-                pixmap.save(temp_image_path)
+    def open_slideshow_window(self):
+        """Open the Slideshow window and hide the main window."""
+        if not self.slideshow_window or not self.slideshow_window.isVisible():
+            self.slideshow_window = SlideShowWindow(self)
+            self.slideshow_window.load_slide_previews(self.slide_previews)  # Pass slide previews here
+            self.hide()  # Hide the main window
+            self.slideshow_window.show()
+            self.slideshow_window.closed.connect(self.show_main_window)
+        else:
+            self.slideshow_window.raise_()
 
-                if os.path.exists(temp_image_path):
-                    # Open image to get dimensions for scaling, and ensure it is closed after use
-                    with Image.open(temp_image_path) as img:
-                        img_width, img_height = img.size
-                        img_ratio = img_width / img_height
-                        slide_ratio = slide_width / slide_height
+    def show_main_window(self):
+        """Show the main window when slideshow window is closed."""
+        self.show()
 
-                        # Scale and center the image to fit the slide
-                        if img_ratio > slide_ratio:
-                            new_width = slide_width
-                            new_height = slide_width / img_ratio
-                        else:
-                            new_height = slide_height
-                            new_width = slide_height * img_ratio
-                        
-                        left = (slide_width - new_width) / 2
-                        top = (slide_height - new_height) / 2
-                    
-                    # Insert scaled image into the slide
-                    slide.Shapes.AddPicture(temp_image_path, 0, 1, left, top, new_width, new_height)
-                    
-                    # Remove the image after it has been added to the slide
-                    os.remove(temp_image_path)
-
-            # Start the slideshow
-            slideshow = presentation.SlideShowSettings
-            slideshow.StartingSlide = 1
-            slideshow.EndingSlide = presentation.Slides.Count
-            slideshow.AdvanceMode = 1  # Manual advance
-            slideshow.Run()
-
-            # Control the slideshow with keyboard input
-            slide_show_window = powerpoint.SlideShowWindows(1)
-            running = True
-            print("Slideshow started. Press 'n' for next, 'p' for previous, or 'q' to quit.")
-
-            while running:
-                if msvcrt.kbhit():
-                    key = msvcrt.getch().decode('utf-8').lower()
-                    if key == 'n':  # Next slide
-                        slide_show_window.View.Next()
-                    elif key == 'p':  # Previous slide
-                        slide_show_window.View.Previous()
-                    elif key == 'q':  # Quit slideshow
-                        print("Exiting slideshow.")
-                        running = False
-
-            presentation.Close()
-            powerpoint.Quit()
-
-        except Exception as e:
-            print(f"Error during slideshow: {e}")
-        finally:
-            # Ensure PowerPoint closes after completion
-            presentation.Close()
-            powerpoint.Quit()
+    def close_slideshow_window(self):
+        print("Slideshow Window closed.")
+        self.slideshow_window = None
 
     def open_verse_repeat_window(self):
         """Open the Verse Repeat window."""
@@ -200,11 +266,82 @@ class ScriptureSlides(QMainWindow):
         print("Verse Repeat window closed.")
         self.verse_repeat_window = None  # Reset the window instance when closed
 
+
+    #TEXT FORMATTING BUTTONS!!
+
     def add_text_item(self):
-        """Add a new draggable text item to the graphics view."""
+        """Add a new draggable text item to the graphics view if it doesn't already exist."""
+        if hasattr(self, 'current_text_item') and self.current_text_item in self.scene.items():
+            print("Text item already added.")
+            return  # Avoid adding duplicate text items
+
         text_item = DraggableTextItem("Editable Text")
-        text_item.setFont(QFont("Arial", 20))
+        text_item.setFont(self.current_font)
+        text_item.setDefaultTextColor(self.current_color)
         self.scene.addItem(text_item)
+        text_item.setTextWidth(200)  # Optional, for wrapping text
+        self.current_text_item = text_item  # Track the currently edited text item
+
+    def apply_text_formatting(self):
+        """Apply all current font settings to the tracked text item without creating duplicates."""
+        if hasattr(self, 'current_text_item') and self.current_text_item:
+            # Apply formatting only to the existing text item
+            self.current_text_item.setFont(self.current_font)
+            self.current_text_item.setDefaultTextColor(self.current_color)
+            cursor = self.current_text_item.textCursor()
+            cursor.select(QTextCursor.Document)
+            text_format = QTextCharFormat()
+            text_format.setFont(self.current_font)
+            text_format.setForeground(self.current_color)
+            cursor.mergeCharFormat(text_format)
+        else:
+            print("No text item selected for formatting.")
+
+    def change_font_family(self, font):
+        """Update the font family for the current text item only."""
+        self.current_font.setFamily(font.family())
+        self.apply_text_formatting()
+
+
+    def change_font_family(self, font):
+        """Update the font family for the selected text item."""
+        self.current_font.setFamily(font.family())
+        if self.current_text_item:
+            self.current_text_item.setFont(self.current_font)
+
+    def increase_font_size(self):
+        """Increase the font size by 1 point."""
+        self.current_font.setPointSize(self.current_font.pointSize() + 1)
+        if self.current_text_item:
+            self.current_text_item.setFont(self.current_font)
+
+    def decrease_font_size(self):
+        """Decrease the font size by 1 point."""
+        if self.current_font.pointSize() > 1:  # Ensure size stays positive
+            self.current_font.setPointSize(self.current_font.pointSize() - 1)
+        if self.current_text_item:
+            self.current_text_item.setFont(self.current_font)
+
+    def change_font_color(self):
+        """Open color dialog to select a font color."""
+        color = QColorDialog.getColor(self.current_color, self)
+        if color.isValid():
+            self.current_color = color
+            if self.current_text_item:
+                self.current_text_item.setDefaultTextColor(self.current_color)
+
+    def toggle_bold(self):
+        """Toggle bold for the current font."""
+        self.current_font.setBold(not self.current_font.bold())
+        if self.current_text_item:
+            self.current_text_item.setFont(self.current_font)
+
+    def set_text_alignment(self, alignment):
+        """Set text alignment for the current text item."""
+        self.current_alignment = alignment
+        if self.current_text_item:
+            self.current_text_item.setTextAlignment(self.current_alignment)
+    
 
     def add_slide(self):
         """Add a new blank slide and save its preview."""
@@ -213,19 +350,19 @@ class ScriptureSlides(QMainWindow):
         self.slide_count += 1
 
         slide_item = f"Slide {self.slide_count}"
-        self.Slide_List_Widget.addItem(slide_item)
+        self.slideListWidget.addItem(slide_item)
         
         self.save_slide_preview()  # Capture preview (using placeholder data)
         print(f"{slide_item} added!")
 
     def add_background_image(self):
         """Add a draggable background image to the QGraphicsView and PowerPoint slide."""
-        selected_items = self.Slide_List_Widget.selectedItems()
+        selected_items = self.slideListWidget.selectedItems()
         if not selected_items:
             print("No slide selected. Add a slide first.")
             return
 
-        selected_index = self.Slide_List_Widget.currentRow()
+        selected_index = self.slideListWidget.currentRow()
         self.current_slide = self.prs.slides[selected_index]  # Get the actual slide from the selected index
 
         # Open file dialog to select an image
@@ -259,7 +396,7 @@ class ScriptureSlides(QMainWindow):
         preview_folder = "./slide_previews/"
         os.makedirs(preview_folder, exist_ok=True)
         
-        slide_number = self.Slide_List_Widget.currentRow() + 1
+        slide_number = self.slideListWidget.currentRow() + 1
         preview_image_path = f"{preview_folder}slide_{slide_number}.png"
         
         slide_width, slide_height = 1280, 720
@@ -289,7 +426,7 @@ class ScriptureSlides(QMainWindow):
 
     def display_slide_in_graphics_view(self):
         """Display the selected slide in QGraphicsView."""
-        selected_items = self.Slide_List_Widget.selectedItems()
+        selected_items = self.slideListWidget.selectedItems()
         if selected_items:
             selected_item = selected_items[0].text()
             image_path = self.slide_previews.get(selected_item)
@@ -302,16 +439,16 @@ class ScriptureSlides(QMainWindow):
         """Open a custom context menu for deleting slides."""
         context_menu = QMenu(self)
         delete_action = context_menu.addAction("Delete Slide")
-        action = context_menu.exec_(self.Slide_List_Widget.mapToGlobal(position))
+        action = context_menu.exec_(self.slideListWidget.mapToGlobal(position))
         
         if action == delete_action:
             self.delete_slide()
 
     def delete_slide(self):
         """Delete the selected slide from the list and presentation."""
-        selected_row = self.Slide_List_Widget.currentRow()
+        selected_row = self.slideListWidget.currentRow()
         if selected_row >= 0:
-            selected_item = self.Slide_List_Widget.takeItem(selected_row)
+            selected_item = self.slideListWidget.takeItem(selected_row)
             slide_name = selected_item.text()
             
             preview_path = self.slide_previews.pop(slide_name, None)

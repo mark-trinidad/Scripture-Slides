@@ -892,7 +892,7 @@ border-radius: 10px;
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QListWidget" name="Slide_List_Widget">
+    <widget class="QListWidget" name="slideListWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -1108,7 +1108,6 @@ border-radius: 10px;
    <zorder>label_6</zorder>
    <zorder>addVerseBtn_2</zorder>
    <zorder>AutoBtn</zorder>
-   <zorder></zorder>
    <zorder>SlideShowBtn</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
